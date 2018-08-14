@@ -4,6 +4,8 @@
 #
 ###############################################################################
 
+find_package(CUDA REQUIRED)
+
 include_directories(
   ${CMAKE_CURRENT_SOURCE_DIR}/../../include
   ${CMAKE_CURRENT_SOURCE_DIR}/../../src/cudpp
@@ -13,19 +15,15 @@ include_directories(
 set(CCFILES
   cudpp_hash.cpp
   debugging.cpp
-  hash_compacting.cpp
-  hash_multivalue.cpp
-  hash_table.cpp
+  cuHash64.cpp
   mt19937ar.cpp
   )
 
 set (HFILES
   debugging.h
   definitions.h
-  hash_compacting.h
   hash_functions.h
-  hash_multivalue.h
-  hash_table.h
+  cuHash64.h
   mt19937ar.h
   )
 
@@ -35,9 +33,7 @@ set (CUHFILES
 
 set(CUFILES
   debugging.cu
-  hash_compacting.cu
-  hash_multivalue.cu
-  hash_table.cu
+  cuhash64.cu
   hash_functions.cu
   )
 

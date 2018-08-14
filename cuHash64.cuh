@@ -14,8 +14,8 @@
  * @brief Implements kernel and __device__ functions for a basic hash table.
  */
 
-#ifndef CUDAHT__CUCKOO__SRC__LIBRARY__HASH_TABLE__CUH
-#define CUDAHT__CUCKOO__SRC__LIBRARY__HASH_TABLE__CUH
+#ifndef CUHASH64__HT__CUH
+#define CUHASH64__HT__CUH
 
 #include "cuHash64.h"
 #include "definitions.h"
@@ -231,7 +231,8 @@ __device__ bool insert(const unsigned table_size,
         for (unsigned its = 1; its <= max_iteration_attempts; its++) {
                 // Insert the new entry.
                 // TODO should fix here
-                entry.key = atomicExch(&table[location].key, entry.key);
+                entry.key = atomicExch(&(table[location].key), entry.key);
+                entry.value = atomicExch(&(table[location].value), entry.value);
                 // entry.key = atomicExch(&(table[location]->key),entry.key);
                 key = get_key(entry);
 
@@ -252,12 +253,16 @@ __device__ bool insert(const unsigned table_size,
                 unsigned slot =
                     CUHASH_HF::stash_hash_function(stash_constants, key);
                 CUHASH::Entry *stash = table + table_size;
-                CUHASH::Entry replaced_entry = atomicCAS(
-                    stash->key + slot, CUHASH::kEntryEmpty.key, entry.key);
-                // CUHASH::Entry replaced_entry ;
+                // CUHASH::Entry replaced_entry = atomicCAS(
+                //  stash->key + slot, CUHASH::kEntryEmpty.key, entry.key);
+                CUHASH::Entry replaced_entry;
 
-                // replaced_entry.key=atomicCAS(&((stash+slot)->key),CUHASH:kEntryEmpty.key,entry.key);
-                //replaced_entry.value = atomicCAS
+                replaced_entry.key = atomicCAS(
+                    &((stash + slot)->key), CUHASH::kEntryEmpty.key, entry.key);
+                replaced_entry.value =
+                    atomicCAS(&((stash + slot)->value),
+                              CUHASH::kEntryEmpty.value, entry.value);
+
                 if (replaced_entry.key != CUHASH::kEntryEmpty.key) {
                         return false;
                 } else {
