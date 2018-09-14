@@ -189,7 +189,7 @@ typedef CUDPPHashTableInternal<void> hti_void;
  */
 
 /* @brief unsigned int indicating a not-found value in a hash table */
-const unsigned int CUDPP_HASH_KEY_NOT_FOUND = CUHASH::kNotFound;
+const unsigned int CUDPP_HASH_KEY_NOT_FOUND = CudaHT::CuckooHashing::kNotFound;
 // cudppHashTable will create some sort of internal struct that you
 // write. It will then cast the pointer to that struct to a
 // CUDPPHandle (just like cudppPlan() does), and return that.

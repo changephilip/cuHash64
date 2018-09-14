@@ -4,8 +4,9 @@
 
 #include <cassert>
 
-namespace CUHASH_HF
+namespace CudaHT
 {
+namespace CuckooHashing{
 void GenerateFunctions(const unsigned N, const unsigned num_keys,
                        const unsigned long long *d_keys, const unsigned table_size,
                        uint2 *constants)
@@ -36,4 +37,5 @@ void GenerateFunctions(const unsigned N, const unsigned num_keys,
 #endif
 }
 
-};  // namespace CUHASH_HF
+};  // namespace CuckooHashing
+};  // namespace CudaHT

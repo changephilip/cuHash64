@@ -12,8 +12,8 @@
 #include <vector_types.h>
 #include "definitions.h"
 
-namespace CUHASH_HF
-{
+namespace CudaHT{
+namespace CuckooHashing {
 const unsigned kPrimeDivisor = 4294967291u;
 
 void GenerateFunctions(const unsigned N, const unsigned num_keys,
@@ -47,8 +47,8 @@ inline __device__ __host__ unsigned hash_function(
 inline __device__ __host__ unsigned stash_hash_function(
     const uint2 stash_constants, const unsigned long long key)
 {
-        return (stash_constants.x ^ key + stash_constants.y) % CUHASH::kStashSize;
+        return (stash_constants.x ^ key + stash_constants.y) % kStashSize;
 }
-}  // namespace CUHASH
-
+};  // namespace CuckooHashing
+};  //namespace CudaHT
 #endif

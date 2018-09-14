@@ -14,36 +14,36 @@
  * @brief Implements kernel and __device__ functions for a basic hash table.
  */
 
-#ifndef CUHASH64__HT__CUH
-#define CUHASH64__HT__CUH
+#ifndef CUDAHT__CUCKOO__SRC__LIBRARY__HASH_TABLE__CUH
+#define CUDAHT__CUCKOO__SRC__LIBRARY__HASH_TABLE__CUH
 
 #include "cuHash64.h"
 #include "definitions.h"
 
 #include <driver_types.h>
 
-namespace CUHASH_HT
-{
+namespace CudaHT{
+namespace CuckooHashing {
 //! Makes an 64-bit Entry out of a key-value pair for the hash table.
-inline __device__ __host__ CUHASH::Entry make_entry(unsigned long long key,
+inline __device__ __host__ Entry make_entry(unsigned long long key,
                                                     unsigned value)
 {
         // return (Entry(key) << 32) + value;
-        CUHASH::Entry tmp;
+        Entry tmp;
         tmp.key = key;
         tmp.value = value;
         return tmp;
 }
 
 //! Returns the key of an Entry.
-inline __device__ __host__ unsigned long long get_key(CUHASH::Entry entry)
+inline __device__ __host__ unsigned long long get_key(Entry entry)
 {
         // return (unsigned) (entry >> 32);
         return (unsigned long long)entry.key;
 }
 
 //! Returns the value of an Entry.
-inline __device__ __host__ unsigned get_value(CUHASH::Entry entry)
+inline __device__ __host__ unsigned get_value(Entry entry)
 {
         return (unsigned)entry.value;
         // return (unsigned) (entry & 0xffffffff);
@@ -67,7 +67,7 @@ __global__ void clear_table(const unsigned table_size, const T value, T *table)
 //! Determine where in the hash table the key could be located.
 template <unsigned kNumHashFunctions>
 __device__ void KeyLocations(
-    const CUHASH_HF::Functions<kNumHashFunctions> constants,
+    const Functions<kNumHashFunctions> constants,
     const unsigned table_size,
     const unsigned long long key,
     unsigned locations[kNumHashFunctions])
@@ -100,8 +100,8 @@ template <unsigned kNumHashFunctions>
 __device__ unsigned retrieve(
     const unsigned long long query_key,
     const unsigned table_size,
-    const CUHASH::Entry *table,
-    const CUHASH_HF::Functions<kNumHashFunctions> constants,
+    const Entry *table,
+    const Functions<kNumHashFunctions> constants,
     const uint2 stash_constants,
     const unsigned stash_count,
     unsigned *num_probes_required = NULL)
@@ -112,12 +112,12 @@ __device__ unsigned retrieve(
 
         // Check each location until the key is found.
         unsigned num_probes = 1;
-        CUHASH::Entry entry = table[locations[0]];
+        Entry entry = table[locations[0]];
         unsigned long long key = get_key(entry);
 
 #pragma unroll
         for (unsigned i = 1; i < kNumHashFunctions; ++i) {
-                if (key != query_key && key != CUHASH::kNotFound) {
+                if (key != query_key && key != kNotFound) {
                         num_probes++;
                         entry = table[locations[i]];
                         key = get_key(entry);
@@ -127,9 +127,9 @@ __device__ unsigned retrieve(
         // Check the stash.
         if (stash_count && get_key(entry) != query_key) {
                 num_probes++;
-                const CUHASH::Entry *stash = table + table_size;
+                const Entry *stash = table + table_size;
                 unsigned slot =
-                    CUHASH_HF::stash_hash_function(stash_constants, query_key);
+                    stash_hash_function(stash_constants, query_key);
                 entry = stash[slot];
         }
 
@@ -142,7 +142,7 @@ __device__ unsigned retrieve(
         if (get_key(entry) == query_key) {
                 return get_value(entry);
         } else {
-                return CUHASH::kNotFound;
+                return kNotFound;
         }
 }
 
@@ -153,8 +153,8 @@ __global__ void hash_retrieve(
     const unsigned n_queries,
     const unsigned long long *keys_in,
     const unsigned table_size,
-    const CUHASH::Entry *table,
-    const CUHASH_HF::Functions<kNumHashFunctions> constants,
+    const Entry *table,
+    const Functions<kNumHashFunctions> constants,
     const uint2 stash_constants,
     const unsigned stash_count,
     unsigned *values_out,
@@ -182,7 +182,7 @@ __global__ void hash_retrieve(
 //! round-robin order.
 template <unsigned kNumHashFunctions>
 __device__ unsigned determine_next_location(
-    const CUHASH_HF::Functions<kNumHashFunctions> constants,
+    const Functions<kNumHashFunctions> constants,
     const unsigned table_size,
     const unsigned long long key,
     const unsigned previous_location)
@@ -213,12 +213,12 @@ __device__ unsigned determine_next_location(
  */
 template <unsigned kNumHashFunctions>
 __device__ bool insert(const unsigned table_size,
-                       const CUHASH_HF::Functions<kNumHashFunctions> constants,
+                       const Functions<kNumHashFunctions> constants,
                        const uint2 stash_constants,
                        const unsigned max_iteration_attempts,
-                       CUHASH::Entry *table,
+                       Entry *table,
                        unsigned *stash_count,
-                       CUHASH::Entry entry,
+                       Entry entry,
                        unsigned *iterations_used)
 {
         unsigned long long key = get_key(entry);
@@ -237,7 +237,7 @@ __device__ bool insert(const unsigned table_size,
                 key = get_key(entry);
 
                 // If no key was evicted, we're done.
-                if (key == CUHASH::kKeyEmpty) {
+                if (key == kKeyEmpty) {
                         *iterations_used = its;
                         break;
                 }
@@ -247,23 +247,23 @@ __device__ bool insert(const unsigned table_size,
                                                    location);
         }
 
-        if (key != CUHASH::kKeyEmpty) {
+        if (key != kKeyEmpty) {
                 // Shove it into the stash.
                 // TODO should fix here
                 unsigned slot =
-                    CUHASH_HF::stash_hash_function(stash_constants, key);
-                CUHASH::Entry *stash = table + table_size;
-                // CUHASH::Entry replaced_entry = atomicCAS(
-                //  stash->key + slot, CUHASH::kEntryEmpty.key, entry.key);
-                CUHASH::Entry replaced_entry;
+                    stash_hash_function(stash_constants, key);
+                Entry *stash = table + table_size;
+                // ::Entry replaced_entry = atomicCAS(
+                //  stash->key + slot, ::kEntryEmpty.key, entry.key);
+                Entry replaced_entry;
 
                 replaced_entry.key = atomicCAS(
-                    &((stash + slot)->key), CUHASH::kEntryEmpty.key, entry.key);
+                    &((stash + slot)->key), kEntryEmpty.key, entry.key);
                 replaced_entry.value =
                     atomicCAS(&((stash + slot)->value),
-                              CUHASH::kEntryEmpty.value, entry.value);
+                              kEntryEmpty.value, entry.value);
 
-                if (replaced_entry.key != CUHASH::kEntryEmpty.key) {
+                if (replaced_entry.key != kEntryEmpty.key) {
                         return false;
                 } else {
                         atomicAdd(stash_count, 1);
@@ -280,9 +280,9 @@ __global__ void CuckooHash(
     const unsigned long long *keys,
     const unsigned *values,
     const unsigned table_size,
-    const CUHASH_HF::Functions<kNumHashFunctions> constants,
+    const Functions<kNumHashFunctions> constants,
     const unsigned max_iteration_attempts,
-    CUHASH::Entry *table,
+    Entry *table,
     uint2 stash_constants,
     unsigned *stash_count,
     unsigned *failures,
@@ -315,7 +315,8 @@ __global__ void CuckooHash(
 }
 //! @}
 
-};  // namespace CudaHT
+};  // namespace CuckooHashing
+}; // namespace CudaHT
 
 #endif
 

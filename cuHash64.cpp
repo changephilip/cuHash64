@@ -27,8 +27,9 @@
 #include <cuda_runtime_api.h>
 #include "cuda_util.h"
 
-namespace CUHASH_HT
+namespace CudaHT
 {
+namespace CuckooHashing {
 char buffer[256];
 
 //! @name Internal
@@ -36,10 +37,10 @@ char buffer[256];
 dim3 ComputeGridDim(unsigned n)
 {
         // Round up in order to make sure all items are hashed in.
-        dim3 grid((n + CUHASH::kBlockSize - 1) / CUHASH::kBlockSize);
-        if (grid.x > CUHASH::kGridSize) {
-                grid.y = (grid.x + CUHASH::kGridSize - 1) / CUHASH::kGridSize;
-                grid.x = CUHASH::kGridSize;
+        dim3 grid((n + kBlockSize - 1) / kBlockSize);
+        if (grid.x > kGridSize) {
+                grid.y = (grid.x + kGridSize - 1) / kGridSize;
+                grid.x = kGridSize;
         }
         return grid;
 }
@@ -104,7 +105,7 @@ bool HashTable::Initialize(const unsigned max_table_entries,
                 return false;
         } else {
                 minimum_space_usage =
-                    CUHASH::kMinimumSpaceUsages[num_functions];
+                    kMinimumSpaceUsages[num_functions];
         }
 
         if (space_usage < minimum_space_usage) {
@@ -124,9 +125,9 @@ bool HashTable::Initialize(const unsigned max_table_entries,
 #endif
 
         // Allocate memory.
-        const unsigned slots_to_allocate = table_size_ + CUHASH::kStashSize;
+        const unsigned slots_to_allocate = table_size_ + kStashSize;
         CUDA_SAFE_CALL(cudaMalloc((void **)&d_contents_,
-                                  sizeof(CUHASH::Entry) * slots_to_allocate));
+                                  sizeof(Entry) * slots_to_allocate));
         CUDA_SAFE_CALL(cudaMalloc((void **)&d_failures_, sizeof(unsigned)));
         if (!d_contents_ || !d_failures_) {
                 fprintf(stderr, "Failed to allocate %u slots.\n",
@@ -173,7 +174,7 @@ bool HashTable::Build(const unsigned n,
         CUDA_CHECK_ERROR("Failed before main build loop.\n");
 
         // Main build loop.
-        while (num_failures && ++num_attempts < CUHASH::kMaxRestartAttempts) {
+        while (num_failures && ++num_attempts < kMaxRestartAttempts) {
                 CUDA_SAFE_CALL(cudaMemset(d_stash_count, 0, sizeof(unsigned)));
 
                 // Generate new hash functions.
@@ -187,13 +188,13 @@ bool HashTable::Build(const unsigned n,
                         constants_5_.Generate(n, d_keys, table_size_);
 
                 stash_constants_.x =
-                    std::max(1lu, genrand_int32()) % CUHASH_HF::kPrimeDivisor;
-                stash_constants_.y = genrand_int32() % CUHASH_HF::kPrimeDivisor;
+                    std::max(1lu, genrand_int32()) % kPrimeDivisor;
+                stash_constants_.y = genrand_int32() % kPrimeDivisor;
                 stash_count_ = 0;
 
                 // Initialize memory.
-                unsigned slots_in_table = table_size_ + CUHASH::kStashSize;
-                ClearTable(slots_in_table, CUHASH::kEntryEmpty, d_contents_);
+                unsigned slots_in_table = table_size_ + kStashSize;
+                ClearTable(slots_in_table, kEntryEmpty, d_contents_);
 
                 num_failures = 0;
 
@@ -236,7 +237,7 @@ bool HashTable::Build(const unsigned n,
 #endif
 
         // Dump some info if a restart was required.
-        if (num_attempts >= CUHASH::kMaxRestartAttempts) {
+        if (num_attempts >= kMaxRestartAttempts) {
                 sprintf(buffer, "Completely failed to build");
                 PrintMessage(buffer, true);
         } else if (num_attempts > 1) {
@@ -258,8 +259,8 @@ void HashTable::Retrieve(const unsigned n_queries,
                          d_values);
 }
 
-};  // namesapce CUHASH_HT
-
+};  // namesapce CuckooHashing
+};  // namespace CudaHT
 // Leave this at the end of the file
 // Local Variables:
 // mode:c++

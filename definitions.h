@@ -7,8 +7,8 @@
  *
  */
 
-#ifndef CUHASH64_H
-#define CUHASH64_H
+#ifndef CUDAHT__CUCKOO__SRC__LIBRARY__DEFINITIONS__H
+#define CUDAHT__CUCKOO__SRC__LIBRARY__DEFINITIONS__H
 
 #include <cstdio>
 #include <limits>
@@ -23,8 +23,9 @@ inline void PrintMessage(const char *message, const bool error = false)
 /**
  *  Hash table constants and definitions
  */
-namespace CUHASH
+namespace CudaHT
 {
+        namespace CuckooHashing{
 // A key and its value are stored in a 96-bit struct.
 typedef struct {
         unsigned long long key;
@@ -53,5 +54,6 @@ const float kMinimumSpaceUsages[] = {std::numeric_limits<float>::max(),
                                      1.03f,
                                      1.02f};
 
-}  // namespace CUHASH
+};  // namespace CuckooHashing
+};  // namespace CudaHT
 #endif

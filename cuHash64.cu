@@ -5,8 +5,9 @@
 
 #include <cuda.h>
 
-namespace CUHASH_HT
-{
+namespace CudaHT{
+namespace CuckooHashing{
+namespace CUDAWrapper{
 void ClearTable(const unsigned slots_in_table,
                 const Entry fill_value,
                 Entry *d_contents)
@@ -90,5 +91,17 @@ void CallHashRetrieve(const unsigned n_queries,
                     n_queries, d_keys, table_size, d_contents, constants_5,
                     stash_constants, stash_count, d_values, d_retrieval_probes);
         }
+
+        CUDA_CHECK_ERROR("Retrieval failed.\n");
+#ifdef TRACK_ITERATIONS
+        OutputRetrievalStatistics(n_queries,
+                                  d_retrieval_probes,
+                                  num_hash_functions);
+        CUDA_SAFE_CALL(cudaFree(d_retrieval_probes));
+#endif
+
 }
-}
+
+}; //namespace CUDAWrapper
+}; //namespace CuckooHashing
+}; //namespace CudaHT

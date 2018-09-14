@@ -17,13 +17,14 @@
 
 #include "debugging.h"
 #include "definitions.h"
-#include "hash_table.cuh"
+#include "cuHash64.cuh"
 
 #include <algorithm>
 #include "cuda_util.h"
 
-namespace CUHASH_DG
+namespace CudaHT
 {
+namespace CuckooHashing{
 //! Debugging function: Takes statistics on the hash functions' distribution.
 /*! Determines:
  *    - How many unique slots each key has.
@@ -242,8 +243,8 @@ void PrintStashContents(const Entry *d_stash)
         delete[] stash;
 }
 
-};  // namespace CUHASH_DG
-
+};  // namespace CuckooHashing
+};  // namespace CudaHT
 // Leave this at the end of the file
 // Local Variables:
 // mode:c++

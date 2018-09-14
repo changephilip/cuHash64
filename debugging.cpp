@@ -22,7 +22,8 @@
 #include <cstring>
 #include "cuda_util.h"
 
-namespace CUHASH_DG {
+namespace CudaHT{
+namespace CuckooHashing{
 
 
 void OutputRetrievalStatistics(const unsigned  n_queries,
@@ -96,8 +97,8 @@ void OutputBuildStatistics(const unsigned  n,
 }
 
 
-}; // namespace CUHASH_DG
-
+}; // namespace CuckooHashing
+}; // namespace CudaHT
 // Leave this at the end of the file
 // Local Variables:
 // mode:c++

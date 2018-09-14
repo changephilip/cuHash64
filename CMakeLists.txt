@@ -22,19 +22,19 @@ set(CCFILES
 set (HFILES
   debugging.h
   definitions.h
-  hash_functions.h
+  hashFunction.h
   cuHash64.h
   mt19937ar.h
   )
 
 set (CUHFILES
-  hash_table.cuh
+  cuHash64.cuh
   )
 
 set(CUFILES
   debugging.cu
-  cuhash64.cu
-  hash_functions.cu
+  cuHash64.cu
+  hashFunction.cu
   )
 
 set(HFILES_PUBLIC

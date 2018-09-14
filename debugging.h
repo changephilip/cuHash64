@@ -23,8 +23,8 @@
 #include <vector_types.h>
 
 #include <algorithm>
-
-namespace CUHASH_DG{
+namespace CudaHT{
+namespace CuckooHashing{
 
 //! @name Debugging functions
 /// @{
@@ -55,7 +55,7 @@ void OutputBuildStatistics(const unsigned  n,
                            const unsigned *d_iterations_taken);
 
 //! Prints out the contents of the stash.
-    void PrintStashContents(const CUHASH::Entry *d_stash);
+    void PrintStashContents(const Entry *d_stash);
 
 //! Checks if a key is assigned the same slot by different hash functions.
 bool CheckAssignedSameSlot(const unsigned  N,
@@ -66,8 +66,8 @@ bool CheckAssignedSameSlot(const unsigned  N,
 
 /// @}
 
-}; // namespace CUHASH_DG
-
+}; // namespace CuckooHashing
+}; // namespace CudaHT
 #endif
 
 // Leave this at the end of the file
