@@ -176,8 +176,8 @@
 #include "cuHash64.h"         // HashTable class
 
 typedef CUDPPHashTableInternal<CudaHT::CuckooHashing::HashTable> hti_basic;
-typedef CUDPPHashTableInternal<CudaHT::CuckooHashing::CompactingHashTable> hti_compacting;
-typedef CUDPPHashTableInternal<CudaHT::CuckooHashing::MultivalueHashTable> hti_multivalue;
+//typedef CUDPPHashTableInternal<CudaHT::CuckooHashing::CompactingHashTable> hti_compacting;
+//typedef CUDPPHashTableInternal<CudaHT::CuckooHashing::MultivalueHashTable> hti_multivalue;
 typedef CUDPPHashTableInternal<void> hti_void;
 
 /** @addtogroup publicInterface
@@ -242,8 +242,8 @@ cudppHashTable(CUDPPHandle cudppHandle, CUDPPHandle *plan,
     case CUDPP_BASIC_HASH_TABLE:
     {
         //printf("Size outside: %lu\n", sizeof(CudaHT::CuckooHashing::HashTable));
-        CUHASH_HT::HashTable * basic_table = 
-            new CUHASH_HT::HashTable();
+        CudaHT::CuckooHashing::HashTable * basic_table = 
+            new CudaHT::CuckooHashing::HashTable();
         basic_table->setTheCudpp(cudppHandle);
         basic_table->Initialize(config->kInputSize, config->space_usage);
         hti_basic * hti = new hti_basic(config, basic_table);
@@ -306,7 +306,7 @@ cudppHashInsert(CUDPPHandle plan, const void* d_keys, const void* d_vals,
     case CUDPP_BASIC_HASH_TABLE:
     {
         hti_basic * hti = (hti_basic *) getPlanPtrFromHandle<hti_basic>(plan);
-        bool s = hti->hash_table->Build(num, (const unsigned int *) d_keys, 
+        bool s = hti->hash_table->Build(num, (const unsigned long long *) d_keys, 
                                         (const unsigned int *) d_vals);
         return s ? CUDPP_SUCCESS : CUDPP_ERROR_UNKNOWN;
         break;
@@ -352,7 +352,7 @@ cudppHashRetrieve(CUDPPHandle plan, const void* d_keys, void* d_vals,
     case CUDPP_BASIC_HASH_TABLE:
     {
         hti_basic * hti = (hti_basic *) getPlanPtrFromHandle<hti_basic>(plan);
-        hti->hash_table->Retrieve(num, (const unsigned int *) d_keys, 
+        hti->hash_table->Retrieve(num, (const unsigned long long *) d_keys, 
                                            (unsigned int *) d_vals);
         return CUDPP_SUCCESS;
         break;
@@ -420,6 +420,8 @@ cudppDestroyHashTable(CUDPPHandle cudppHandle, CUDPPHandle plan)
  * hash_overview
  */
 // TODO remove this function
+
+/*
 CUDPP_DLL
 CUDPPResult
 cudppMultivalueHashGetValuesSize(CUDPPHandle plan, unsigned int * size)
@@ -435,6 +437,7 @@ cudppMultivalueHashGetValuesSize(CUDPPHandle plan, unsigned int * size)
     *size = hti->hash_table->get_values_size();
     return CUDPP_SUCCESS;
 }
+*/
 
 /**
  * @brief Retrieves a pointer to the values array in a multivalue hash table
@@ -454,6 +457,8 @@ cudppMultivalueHashGetValuesSize(CUDPPHandle plan, unsigned int * size)
  * hash_overview
  */
 // TODO remove this function
+
+/*
 CUDPP_DLL
 CUDPPResult
 cudppMultivalueHashGetAllValues(CUDPPHandle plan, unsigned int ** d_vals)
@@ -470,6 +475,7 @@ cudppMultivalueHashGetAllValues(CUDPPHandle plan, unsigned int ** d_vals)
     *d_vals = (unsigned*) (hti->hash_table->get_all_values());
     return CUDPP_SUCCESS;
 }
+*/
 
 /** @} */ // end Plan Interface
 /** @} */ // end publicInterface

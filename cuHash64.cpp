@@ -194,11 +194,11 @@ bool HashTable::Build(const unsigned n,
 
                 // Initialize memory.
                 unsigned slots_in_table = table_size_ + kStashSize;
-                ClearTable(slots_in_table, kEntryEmpty, d_contents_);
+                CUDAWrapper::ClearTable(slots_in_table, kEntryEmpty, d_contents_);
 
                 num_failures = 0;
 
-                CallCuckooHash(n, num_hash_functions_, d_keys, d_values,
+                CUDAWrapper::CallCuckooHash(n, num_hash_functions_, d_keys, d_values,
                                table_size_, constants_2_, constants_3_,
                                constants_4_, constants_5_, max_iterations,
                                d_contents_, stash_constants_, d_stash_count,
@@ -253,7 +253,7 @@ void HashTable::Retrieve(const unsigned n_queries,
                          const unsigned long long *d_keys,
                          unsigned *d_values)
 {
-        CallHashRetrieve(n_queries, num_hash_functions_, d_keys, table_size_,
+        CUDAWrapper::CallHashRetrieve(n_queries, num_hash_functions_, d_keys, table_size_,
                          d_contents_, constants_2_, constants_3_, constants_4_,
                          constants_5_, stash_constants_, stash_count_,
                          d_values);
