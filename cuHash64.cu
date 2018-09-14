@@ -12,7 +12,7 @@ void ClearTable(const unsigned slots_in_table,
                 const Entry fill_value,
                 Entry *d_contents)
 {
-        clear_table<<<ComputerGridDim((slots_in_table), kBlockSize)>>>(
+        clear_table<<<ComputeGridDim(slots_in_table), kBlockSize>>>(
             slots_in_table, fill_value, d_contents);
         CUDA_CHECK_ERROR("Error occurred during hash table clear.\n");
 }
@@ -26,6 +26,7 @@ void CallCuckooHash(const unsigned n,
                     const Functions<3> constants_3,
                     const Functions<4> constants_4,
                     const Functions<5> constants_5,
+	            const unsigned max_iterations,
                     Entry *d_contents,
                     uint2 stash_constants,
                     unsigned *d_stash_count,
@@ -57,14 +58,14 @@ void CallCuckooHash(const unsigned n,
         CUDA_CHECK_ERROR("Error occurred during hash table build.\n");
 }
 void CallHashRetrieve(const unsigned n_queries,
-                      const unsigned num_hahs_functions,
+                      const unsigned num_hash_functions,
                       const unsigned long long *d_keys,
                       const unsigned table_size,
                       const Entry *d_contents,
-                      const Function<2> constants_2,
-                      const Function<3> constants_3,
-                      const Function<4> constants_4,
-                      const Function<5> constants_5,
+                      const Functions<2> constants_2,
+                      const Functions<3> constants_3,
+                      const Functions<4> constants_4,
+                      const Functions<5> constants_5,
                       const uint2 stash_constants,
                       const unsigned stash_count,
                       unsigned *d_values)

@@ -30,7 +30,7 @@ namespace CudaHT
 typedef struct {
         unsigned long long key;
         unsigned value;
-} Entry;
+}Entry;
 
 // Number of build attempts
 const unsigned kMaxRestartAttempts = 10;
@@ -43,8 +43,8 @@ const unsigned kMaxHashFunctions =
     5;  // Maximum number of hash functions allowed.
 const unsigned kStashSize = 101;
 
-const Entry kEntryEmpty = Entry{kKeyEmpty, 0u};
-const Entry kEntryNotFound = Entry{kKeyEmpty, kNotFound};
+const Entry kEntryEmpty = (Entry){kKeyEmpty, 0u};
+const Entry kEntryNotFound = (Entry){kKeyEmpty, kNotFound};
 const unsigned kBlockSize = 64;
 const unsigned kGridSize = 16384;
 const float kMinimumSpaceUsages[] = {std::numeric_limits<float>::max(),

@@ -258,12 +258,12 @@ __device__ bool insert(const unsigned table_size,
                 Entry replaced_entry;
 
                 replaced_entry.key = atomicCAS(
-                    &((stash + slot)->key), kEntryEmpty.key, entry.key);
+                    &((stash + slot)->key), kKeyEmpty, entry.key);
                 replaced_entry.value =
                     atomicCAS(&((stash + slot)->value),
-                              kEntryEmpty.value, entry.value);
+                              kKeyEmpty, entry.value);
 
-                if (replaced_entry.key != kEntryEmpty.key) {
+                if (replaced_entry.key != kKeyEmpty) {
                         return false;
                 } else {
                         atomicAdd(stash_count, 1);

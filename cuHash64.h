@@ -18,7 +18,7 @@
 
 namespace CudaHT{
 namespace CuckooHashing {
-dim3 ComputerGridDim(unsigned threads);
+dim3 ComputeGridDim(unsigned threads);
 
 unsigned ComputeMaxIterations(const unsigned num_keys,
                               const unsigned table_size,
@@ -64,7 +64,7 @@ class HashTable
        protected:
         unsigned table_size_;          //!< Size of the hash table.
         unsigned num_hash_functions_;  //!< Number of hash functions being used.
-        CUHASH::Entry *d_contents_;  //!< Device memory: The hash table contents.  The
+        Entry *d_contents_;  //!< Device memory: The hash table contents.  The
                              //!stash is stored at the end.
         unsigned stash_count_;  //!< Number of key-value pairs currently stored.
         uint2 stash_constants_;  //!< Hash function constants for the stash.
