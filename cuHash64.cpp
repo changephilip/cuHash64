@@ -184,11 +184,11 @@ bool HashTable::Build(const unsigned n,
                         constants_3_.Generate(n, d_keys, table_size_);
                 else if (num_hash_functions_ == 4)
                         constants_4_.Generate(n, d_keys, table_size_);
-                else
+                else{
                         constants_5_.Generate(n, d_keys, table_size_);
-
+			}
                 stash_constants_.x =
-                    std::max(1lu, genrand_int32()) % kPrimeDivisor;
+                    std::max(1ul, genrand_int32()) % kPrimeDivisor;
                 stash_constants_.y = genrand_int32() % kPrimeDivisor;
                 stash_count_ = 0;
 

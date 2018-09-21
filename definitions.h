@@ -35,7 +35,7 @@ typedef struct {
 // Number of build attempts
 const unsigned kMaxRestartAttempts = 10;
 // Signifies empty slots in the table.
-const unsigned long long kKeyEmpty = 0xFFFFFFFFFFFFFFFFu;
+const unsigned long long kKeyEmpty = 0xffffffffffffffffu;
 // Signifies that a query key was not found.
 const unsigned kNotFound =
     0xFFFFFFFFu;  // Signifies that a query key was not found.

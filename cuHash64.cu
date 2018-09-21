@@ -46,16 +46,15 @@ void CallCuckooHash(const unsigned n,
                     d_failures, d_iterations_taken);
         } else if (num_hash_functions == 4) {
                 CuckooHash<<<ComputeGridDim(n), kBlockSize>>>(
-                    n, d_keys, d_values, table_size, constants_3,
+                    n, d_keys, d_values, table_size, constants_4,
                     max_iterations, d_contents, stash_constants, d_stash_count,
                     d_failures, d_iterations_taken);
         } else {
                 CuckooHash<<<ComputeGridDim(n), kBlockSize>>>(
-                    n, d_keys, d_values, table_size, constants_3,
+                    n, d_keys, d_values, table_size, constants_5,
                     max_iterations, d_contents, stash_constants, d_stash_count,
                     d_failures, d_iterations_taken);
         }
-        CUDA_CHECK_ERROR("Error occurred during hash table build.\n");
 }
 void CallHashRetrieve(const unsigned n_queries,
                       const unsigned num_hash_functions,

@@ -109,21 +109,30 @@ __device__ unsigned retrieve(
         // Identify all of the locations that the key can be located in.
         unsigned locations[kNumHashFunctions];
         KeyLocations(constants, table_size, query_key, locations);
-
+	printf("in ret,threadid %u,q_key %llu\n",threadIdx.x,query_key);
         // Check each location until the key is found.
         unsigned num_probes = 1;
         Entry entry = table[locations[0]];
         unsigned long long key = get_key(entry);
-
+	if (threadIdx.x==0){
+		for (unsigned int i =0 ;i<table_size;i++){
+			printf("insided,%d,table key %llu,value %u\n",i,table[i].key,table[i].value);
+		}
+		printf("this key,query_key,%llu\n",query_key);
+		for (unsigned int i=0;i< kNumHashFunctions;i++){
+			printf("hfn,%u,num,%u,key,%llu\n",i,locations[i],table[locations[i]].key);
+			printf("KNHF %u\n",kNumHashFunctions);
+		}
+	}
 #pragma unroll
         for (unsigned i = 1; i < kNumHashFunctions; ++i) {
-                if (key != query_key && key != kNotFound) {
+                if (key != query_key && key != 0xffffffffffffffffu) {
                         num_probes++;
                         entry = table[locations[i]];
                         key = get_key(entry);
                 }
         }
-
+	printf("first justice,thread %u,query_key %llu,key,%llu\n",threadIdx.x,query_key,key);
         // Check the stash.
         if (stash_count && get_key(entry) != query_key) {
                 num_probes++;
@@ -138,8 +147,9 @@ __device__ unsigned retrieve(
                 *num_probes_required = num_probes;
         }
 #endif
-
+	printf("left key %llu,right key,%llu\n",entry.key,query_key);
         if (get_key(entry) == query_key) {
+		printf("return a value,key %llu,value,%lu\n",entry.key,entry.value);
                 return get_value(entry);
         } else {
                 return kNotFound;
@@ -222,22 +232,33 @@ __device__ bool insert(const unsigned table_size,
                        unsigned *iterations_used)
 {
         unsigned long long key = get_key(entry);
-
+	if (threadIdx.x==0){
+	printf("kKeyEmpty %llu\n",kKeyEmpty);
+	printf("idx=0,hfn\n");
+	for (unsigned i=0;i<kNumHashFunctions;i++){
+		printf("hfn %u %u\n",i,hash_function(constants,i,key)%table_size);	
+		printf("KNHF %u\n",kNumHashFunctions);
+	}
+	}
         // The key is always inserted into its first slot at the start.
         unsigned location = hash_function(constants, 0, key) % table_size;
-
+	printf("location\t%u\n",location);
         // Keep inserting until an empty slot is found or the eviction chain
         // grows too large.
         for (unsigned its = 1; its <= max_iteration_attempts; its++) {
                 // Insert the new entry.
                 // TODO should fix here
+		printf("before inset ,location %u,location's key and value,%llu\t%lu\n",location,table[location].key,table[location].value);
+		printf("before insret ,location %u,key and value,%llu\t%lu\n",location,entry.key,entry.value);
                 entry.key = atomicExch(&(table[location].key), entry.key);
                 entry.value = atomicExch(&(table[location].value), entry.value);
                 // entry.key = atomicExch(&(table[location]->key),entry.key);
                 key = get_key(entry);
-
+		printf("after insert, location %u,key %llu,value %lu\n",location ,entry.key,entry.value);
+		printf("after insert, location %u,table key %llu,value %lu\n",location,table[location].key,table[location].value);
                 // If no key was evicted, we're done.
                 if (key == kKeyEmpty) {
+			printf("the thread location is OK %u\n",location);
                         *iterations_used = its;
                         break;
                 }
@@ -261,9 +282,9 @@ __device__ bool insert(const unsigned table_size,
                     &((stash + slot)->key), kKeyEmpty, entry.key);
                 replaced_entry.value =
                     atomicCAS(&((stash + slot)->value),
-                              0x0UL, entry.value);
+                              0u, entry.value);
 
-                if (replaced_entry.key != kKeyEmpty) {
+                if (replaced_entry.key != kKeyEmpty and replaced_entry.value != 0U) {
                         return false;
                 } else {
                         atomicAdd(stash_count, 1);
@@ -294,7 +315,8 @@ __global__ void CuckooHash(
         if (thread_index >= n_entries || *failures)
                 return;
         Entry entry = make_entry(keys[thread_index], values[thread_index]);
-
+	printf("entry key %llu\t value %lu\n",keys[thread_index],values[thread_index]);
+	printf("entry key %llu\t value %lu\n",entry.key,entry.value);
         unsigned iterations = 0;
         bool success = insert<kNumHashFunctions>(
             table_size, constants, stash_constants, max_iteration_attempts,
