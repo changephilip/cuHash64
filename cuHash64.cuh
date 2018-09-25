@@ -113,7 +113,7 @@ __device__ unsigned retrieve(
         unsigned num_probes = 1;
         Entry entry = table[locations[0]];
         unsigned long long key = get_key(entry);
-	}
+	
 #pragma unroll
         for (unsigned i = 1; i < kNumHashFunctions; ++i) {
                 if (key != query_key && key != 0xffffffffffffffffu) {
